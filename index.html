@@ -4,13 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SecureText - Encrypt & Decrypt</title>
-    <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Link to your external stylesheet -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-gray-900 text-gray-200 flex items-center justify-center min-h-screen p-4">
@@ -23,10 +20,8 @@
             <p class="text-gray-400 mt-2">Encrypt and Decrypt messages directly in your browser.</p>
         </header>
 
-        <!-- Main content grid -->
         <main class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             
-            <!-- Encryption Card -->
             <div class="bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-700">
                 <div class="flex items-center mb-4">
                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-400 mr-3"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
@@ -39,7 +34,7 @@
                     </div>
                     <div>
                         <label for="encrypt-password" class="block text-sm font-medium text-gray-400 mb-1">Secret Key / Password</label>
-                        <input type="password" id="encrypt-password" class="w-full bg-gray-900 border border-gray-600 rounded-lg p-3 text-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition" placeholder="Enter a strong password">
+                        <input type="password" id="encrypt-password" class="w-full bg-gray-900 border border-gray-600 rounded-lg p-3 text-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition" placeholder="Enter a strong password (min. 8 characters)">
                     </div>
                     <button id="encrypt-button" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105">
                         Encrypt Text
@@ -54,7 +49,6 @@
                 </div>
             </div>
 
-            <!-- Decryption Card -->
             <div class="bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-700">
                  <div class="flex items-center mb-4">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-400 mr-3"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>
@@ -83,18 +77,15 @@
             </div>
         </main>
         
-        <!-- Footer -->
         <footer class="text-center mt-8 text-gray-500 text-sm">
-            <p>&copy; 2024 SecureText. All encryption is performed locally in your browser.</p>
+            <p>&copy; 2025 SecureText. All encryption is performed locally in your browser.</p>
         </footer>
     </div>
     
-    <!-- Custom alert/modal for messages -->
     <div id="alert-modal" class="fixed top-5 right-5 bg-red-500 text-white py-2 px-4 rounded-lg shadow-lg opacity-0 transform translate-y-2 transition-all duration-300">
         <p id="alert-message"></p>
     </div>
 
-    <!-- Link to your external script file -->
     <script src="script.js"></script>
 </body>
 </html>

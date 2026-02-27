@@ -43,6 +43,24 @@ function b642ab(b64) {
     return bytes.buffer;
 }
 
+// Create a SHA-256 hash of the password for verification
+async function getPasswordHash(password) {
+    const encoded = str2ab(password);
+    return await window.crypto.subtle.digest('SHA-256', encoded);
+}
+
+// Compare two ArrayBuffers to see if they are identical
+function compareArrayBuffers(buf1, buf2) {
+    if (buf1.byteLength !== buf2.byteLength) return false;
+    const view1 = new Uint8Array(buf1);
+    const view2 = new Uint8Array(buf2);
+    for (let i = 0; i < view1.length; i++) {
+        if (view1[i] !== view2[i]) return false;
+    }
+    return true;
+}
+
+
 // --- Core Cryptography Functions ---
 
 // Get a crypto key from a password using PBKDF2
@@ -68,13 +86,13 @@ async function getKey(password, salt) {
     );
 }
 
-// Encrypt text using a password
+// Encrypt text using a password and store its hash
 async function encryptText(text, password) {
     try {
-        // Generate a random salt and initialization vector (IV)
         const salt = window.crypto.getRandomValues(new Uint8Array(16));
         const iv = window.crypto.getRandomValues(new Uint8Array(12));
-        
+        const passwordHash = await getPasswordHash(password); // Create password hash
+
         const key = await getKey(password, salt);
         const encryptedContent = await window.crypto.subtle.encrypt(
             { name: "AES-GCM", iv: iv },
@@ -82,11 +100,16 @@ async function encryptText(text, password) {
             str2ab(text)
         );
 
-        // Combine salt, iv, and encrypted content into a single base64 string
-        const combined = new Uint8Array(salt.length + iv.length + encryptedContent.byteLength);
-        combined.set(salt, 0);
-        combined.set(iv, salt.length);
-        combined.set(new Uint8Array(encryptedContent), salt.length + iv.length);
+        // Combine salt, iv, password hash, and encrypted content into a single base64 string
+        const combined = new Uint8Array(salt.length + iv.length + passwordHash.byteLength + encryptedContent.byteLength);
+        let offset = 0;
+        combined.set(salt, offset);
+        offset += salt.length;
+        combined.set(iv, offset);
+        offset += iv.length;
+        combined.set(new Uint8Array(passwordHash), offset);
+        offset += passwordHash.byteLength;
+        combined.set(new Uint8Array(encryptedContent), offset);
 
         return ab2b64(combined.buffer);
 
@@ -97,16 +120,25 @@ async function encryptText(text, password) {
     }
 }
 
-// Decrypt text using a password
+// Decrypt text by first verifying the password hash
 async function decryptText(encryptedTextB64, password) {
     try {
         const combined = b642ab(encryptedTextB64);
         
-        // Extract salt, iv, and encrypted content from the combined buffer
+        // Extract salt, iv, stored hash, and encrypted content
         const salt = combined.slice(0, 16);
         const iv = combined.slice(16, 28);
-        const encryptedContent = combined.slice(28);
+        const storedHash = combined.slice(28, 60); // SHA-256 is 32 bytes
+        const encryptedContent = combined.slice(60);
 
+        // Hash the entered password and compare it to the stored hash
+        const enteredPasswordHash = await getPasswordHash(password);
+        if (!compareArrayBuffers(storedHash, enteredPasswordHash)) {
+            showMessage("Decryption failed. The password provided is incorrect.", true);
+            return null;
+        }
+
+        // If hashes match, proceed with decryption
         const key = await getKey(password, salt);
         const decryptedContent = await window.crypto.subtle.decrypt(
             { name: "AES-GCM", iv: iv },
@@ -117,14 +149,15 @@ async function decryptText(encryptedTextB64, password) {
         return ab2str(decryptedContent);
     } catch (error) {
         console.error("Decryption failed:", error);
-        showMessage("Decryption failed. Check password or encrypted text.", true);
+        // This message now primarily handles corrupted data, as the password was already verified.
+        showMessage("Decryption failed. The encrypted text may be corrupt.", true);
         return null;
     }
 }
 
 // --- Event Listeners ---
 
-// Handle encryption
+// Handle encryption with password validation
 encryptButton.addEventListener('click', async () => {
     const text = document.getElementById('encrypt-text').value;
     const password = document.getElementById('encrypt-password').value;
@@ -132,6 +165,12 @@ encryptButton.addEventListener('click', async () => {
 
     if (!text || !password) {
         showMessage("Please provide both text and a password to encrypt.", true);
+        return;
+    }
+
+    // Check for password length
+    if (password.length < 3) {
+        showMessage("Password must be at least 8 characters long.", true);
         return;
     }
     
@@ -181,7 +220,6 @@ copyEncryptedButton.addEventListener('click', () => {
     const output = document.getElementById('encrypt-output');
     const originalText = copyEncryptedButton.textContent;
     output.select();
-    // Using document.execCommand for better browser compatibility in iFrames
     try {
         document.execCommand('copy');
         copyEncryptedButton.textContent = 'Copied!';
