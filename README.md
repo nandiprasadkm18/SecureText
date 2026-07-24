@@ -1,4 +1,4 @@
-🔐 SecureText
+🔐 SecureText https://nandiprasadkm18.github.io/SecureText/
 
 A lightweight and secure text encryption & decryption tool built with Python.
 
